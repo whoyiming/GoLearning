@@ -391,9 +391,610 @@ func main() {
 }
 ```
 
+== Go 流程控制
 
+=== if-else 条件语句
 
+`if` 语句在基础语法中已经接触过，它还有一个强大的特性：可以在条件判断前包含一个初始化语句。这个初始化语句定义的变量，其作用域仅在 `if-else` 块内。
 
+[source, Go]
+----
+package main
 
+import (
+    "fmt"
+    "os"
+)
 
+func main() {
+    // a 的作用域只在 if-else 内部
+    if a := len(os.Args); a > 1 {
+        fmt.Println("你输入了", a-1, "个参数")
+    } else {
+        fmt.Println("没有检测到输入参数")
+    }
+    
+    // 在这里访问 a 会导致编译错误
+    // fmt.Println(a) 
+}
+----
 
+=== for 循环
+
+Go 语言中只有 `for` 这一种循环结构，但它能实现多种循环模式。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    // 1. 基本的 for 循环 (类似 C/Java)
+    sum := 0
+    for i := 0; i < 10; i++ {
+        sum += i
+    }
+    fmt.Println("0到9的和是:", sum)
+
+    // 2. 省略初始化和后置语句 (类似 while)
+    n := 1
+    for n < 100 {
+        n *= 2
+    }
+    fmt.Println("大于100的最小2的幂是:", n)
+
+    // 3. 无限循环 (需要 break 或 return 退出)
+    // for {
+    //     fmt.Println("这是一个无限循环，请手动停止程序")
+    // }
+    
+    // 4. for range 遍历 (非常常用)
+    s := "Go语言"
+    for index, char := range s {
+        // 注意 index 是字节位置，char 是 rune 类型
+        fmt.Printf("在字节位置 %d 的字符是 %c\n", index, char)
+    }
+}
+----
+
+=== switch 分支语句
+
+Go 的 `switch` 非常灵活，它自动为每个 `case` 添加 `break`，匹配逻辑也更强大。
+
+[source, Go]
+----
+package main
+
+import (
+    "fmt"
+    "runtime"
+    "time"
+)
+
+func main() {
+    // 1. 基本的 switch
+    fmt.Print("Go 运行在 ")
+    switch os := runtime.GOOS; os {
+    case "darwin":
+        fmt.Println("OS X.")
+    case "linux":
+        fmt.Println("Linux.")
+    default:
+        // os 在这里仍然可见
+        fmt.Printf("%s.\n", os)
+    }
+
+    // 2. 无表达式的 switch (相当于 if-else if-else)
+    t := time.Now()
+    switch {
+    case t.Hour() < 12:
+        fmt.Println("上午好!")
+    case t.Hour() < 17:
+        fmt.Println("下午好!")
+    default:
+        fmt.Println("晚上好!")
+    }
+    
+    // 3. case 可以有多个值
+    day := "saturday"
+    switch day {
+    case "saturday", "sunday":
+        fmt.Println("是周末！")
+    default:
+        fmt.Println("是工作日。")
+    }
+}
+----
+
+=== defer, panic, 和 recover
+
+`defer` 用于延迟执行一个函数调用，通常用于清理资源。`panic` 用于触发一个运行时恐慌（致命错误），而 `recover` 用于捕获这个恐慌，让程序恢复执行。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    // defer 会在函数返回前执行，多个 defer 按后进先出(LIFO)顺序执行
+    defer fmt.Println("世界")
+    defer fmt.Println("，")
+    fmt.Print("你好")
+    // 输出将是: 你好，世界
+
+    causePanic()
+    fmt.Println("这行不会被执行，因为 panic 导致程序中断")
+}
+
+func causePanic() {
+    // 使用 defer 和 recover 来捕获 panic
+    defer func() {
+        // recover() 只有在 defer 的函数中调用才有效
+        if r := recover(); r != nil {
+            fmt.Println("\n捕获到了一个 panic:", r)
+        }
+    }()
+
+    fmt.Println("\n准备触发一个 panic")
+    // 模拟一个致命错误
+    panic("这是一个故意的 panic")
+}
+----
+
+== 复合数据类型
+
+=== 数组 (Array)
+
+数组是具有固定长度且包含相同类型元素的序列。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    // 声明一个包含5个整数的数组，默认值为0
+    var a [5]int
+    fmt.Println("空数组:", a)
+
+    // 赋值和访问
+    a[4] = 100
+    fmt.Println("赋值后:", a)
+    fmt.Println("访问 a[4]:", a[4])
+    
+    // 声明并初始化
+    b := [3]int{1, 2, 3}
+    fmt.Println("初始化 b:", b)
+
+    // Go 会自动计算数组长度
+    c := [...]string{"北京", "上海", "深圳"}
+    fmt.Println("城市:", c, "长度:", len(c))
+}
+----
+
+=== 切片 (Slice)
+
+切片是 Go 中最重要也最常用的数据结构之一。它提供了对数组中元素序列的动态、灵活的视图。与数组不同，切片的长度是可变的。
+
+一个切片有三个核心属性：指针（指向底层数组的第一个元素）、长度（`len`，切片中元素的数量）和容量（`cap`，从切片开始位置到底层数组末尾的元素数量）。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    // 1. 从数组创建切片
+    primes := [6]int{2, 3, 5, 7, 11, 13}
+    var s []int = primes[1:4] // 从索引1到3(不含4)
+    fmt.Println("切片 s:", s, "长度:", len(s), "容量:", cap(s))
+
+    // 2. 使用 make 创建切片
+    // 创建一个长度为5，容量为10的切片
+    s2 := make([]int, 5, 10) 
+    fmt.Println("make 创建的 s2:", s2, "长度:", len(s2), "容量:", cap(s2))
+
+    // 3. 向切片追加元素
+    s2 = append(s2, 1)
+    fmt.Println("append 后的 s2:", s2, "长度:", len(s2), "容量:", cap(s2))
+    
+    // 如果超过容量，Go 会分配一个新的、更大的底层数组
+    
+    // 4. 遍历切片
+    for i, v := range s {
+        fmt.Printf("s[%d] = %d\n", i, v)
+    }
+}
+----
+
+=== Map
+
+Map 是一个无序的键值对集合，也称为哈希表或字典。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    // 1. 创建 map
+    // var m map[string]int // 值为 nil，无法使用
+    m := make(map[string]int) // 正确的创建方式
+
+    // 2. 存值
+    m["北京"] = 101
+    m["上海"] = 102
+    
+    fmt.Println("Map:", m)
+    
+    // 3. 取值
+    v1 := m["北京"]
+    fmt.Println("北京区号:", v1)
+    
+    // 4. 删除键值对
+    delete(m, "上海")
+    fmt.Println("删除后:", m)
+    
+    // 5. 判断键是否存在
+    // 如果键不存在，v 会是值的零值(这里是0)，ok 会是 false
+    v, ok := m["广州"]
+    if ok {
+        fmt.Println("广州区号是:", v)
+    } else {
+        fmt.Println("广州的区号不存在")
+    }
+}
+----
+
+=== 结构体 (Struct)
+
+结构体是一个字段的集合，用于将数据聚合在一起形成新的类型。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+// 定义一个 Person 结构体
+type Person struct {
+    Name string
+    Age  int
+}
+
+func main() {
+    // 1. 创建结构体实例
+    p1 := Person{"小明", 20}
+    fmt.Println("p1:", p1)
+    
+    // 2. 使用字段名创建
+    p2 := Person{Name: "小红", Age: 19}
+    fmt.Println("p2:", p2)
+    
+    // 3. 访问字段
+    fmt.Println("p2 的名字是:", p2.Name)
+    
+    // 4. 结构体指针
+    p3 := &Person{Name: "小刚", Age: 22}
+    // Go 语言很方便，可以直接用 p3.Age 访问，无需像 C++ 那样写 (*p3).Age
+    p3.Age++ 
+    fmt.Println("小刚明年", p3.Age, "岁")
+}
+----
+
+== Go 函数
+
+在Go中，函数是“一等公民”，意味着它们可以像任何其他值一样被传递、赋值。
+
+=== 多返回值
+
+Go函数可以返回任意数量的值。这在Go中被广泛用于返回结果和错误信息。
+
+[source, Go]
+----
+package main
+
+import (
+    "fmt"
+    "strconv"
+)
+
+// stringToInt 将字符串转换为整数，同时返回结果和一个错误信息
+func stringToInt(s string) (int, error) {
+    i, err := strconv.Atoi(s)
+    if err != nil {
+        // 如果转换出错，返回0和错误信息
+        return 0, fmt.Errorf("转换失败: %v", err)
+    }
+    // 成功则返回转换后的整数和 nil
+    return i, nil
+}
+
+func main() {
+    val1, err1 := stringToInt("123")
+    if err1 != nil {
+        fmt.Println(err1)
+    } else {
+        fmt.Println("成功:", val1)
+    }
+    
+    val2, err2 := stringToInt("abc")
+    if err2 != nil {
+        fmt.Println(err2)
+    } else {
+        fmt.Println("成功:", val2)
+    }
+}
+----
+
+=== 可变参数
+
+函数可以接受不定数量的参数，这称为可变参数。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+// sum 函数可以接受任意数量的 int 参数
+func sum(nums ...int) {
+    fmt.Print(nums, " -> ")
+    total := 0
+    for _, num := range nums {
+        total += num
+    }
+    fmt.Println(total)
+}
+
+func main() {
+    sum(1, 2)
+    sum(1, 2, 3, 4)
+
+    // 如果你有一个切片，可以使用 `...` 将其展开作为参数
+    nums := []int{1, 2, 3, 4, 5}
+    sum(nums...)
+}
+----
+
+== 指针
+
+指针保存了值的内存地址。使用指针，我们可以在函数内直接修改调用者作用域中的变量，避免在函数调用时进行大数据块的复制。
+
+- `&` 操作符会生成一个指向其操作数的指针。
+- `*` 操作符表示指针指向的底层值。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+// zeroval 通过值传递，函数内部对 i 的修改不影响外部
+func zeroval(ival int) {
+    ival = 0
+}
+
+// zeroptr 通过指针传递，函数内部的修改会影响到外部的原始变量
+func zeroptr(iptr *int) {
+    *iptr = 0 // 使用 * 解引用，修改指针指向地址的值
+}
+
+func main() {
+    i := 1
+    fmt.Println("初始值:", i)
+
+    zeroval(i)
+    fmt.Println("zeroval 后:", i) // i 的值没有改变
+
+    zeroptr(&i) // 使用 & 获取 i 的内存地址
+    fmt.Println("zeroptr 后:", i) // i 的值被改变为0
+
+    fmt.Println("i 的指针地址是:", &i)
+}
+----
+
+== 方法与接口
+
+=== 方法 (Method)
+
+方法是带有特殊“接收者”参数的函数。接收者可以是值类型或指针类型。方法提供了一种类似面向对象编程中“类”的行为。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+type Rect struct {
+    width, height int
+}
+
+// area 方法有一个名为 r，类型为 *Rect 的接收者
+func (r *Rect) area() int {
+    return r.width * r.height
+}
+
+// perim 方法有一个名为 r，类型为 Rect 的接收者
+func (r Rect) perim() int {
+    return 2*r.width + 2*r.height
+}
+
+func main() {
+    r := Rect{width: 10, height: 5}
+
+    // 调用方法
+    fmt.Println("面积: ", r.area())
+    fmt.Println("周长: ", r.perim())
+
+    rp := &r
+    fmt.Println("面积 (通过指针): ", rp.area())
+    fmt.Println("周长 (通过指针): ", rp.perim())
+}
+----
+
+=== 接口 (Interface)
+
+接口是定义了一组方法签名的类型。一个类型只要实现了接口中定义的所有方法，就被认为是“实现”了这个接口。这种实现是隐式的，无需像Java一样使用`implements`关键字。
+
+[source, Go]
+----
+package main
+
+import (
+    "fmt"
+    "math"
+)
+
+// 定义一个几何体接口
+type Geometry interface {
+    area() float64
+    perim() float64
+}
+
+// 定义 Circle 和 Rect 类型
+type Circle struct {
+    radius float64
+}
+type Rect struct {
+    width, height float64
+}
+
+// 为 Circle 实现 Geometry 接口
+func (c Circle) area() float64 {
+    return math.Pi * c.radius * c.radius
+}
+func (c Circle) perim() float64 {
+    return 2 * math.Pi * c.radius
+}
+
+// 为 Rect 实现 Geometry 接口
+func (r Rect) area() float64 {
+    return r.width * r.height
+}
+func (r Rect) perim() float64 {
+    return 2*r.width + 2*r.height
+}
+
+// measure 函数接收任何实现了 Geometry 接口的类型
+func measure(g Geometry) {
+    fmt.Println(g)
+    fmt.Println("面积:", g.area())
+    fmt.Println("周长:", g.perim())
+}
+
+func main() {
+    c := Circle{radius: 5}
+    r := Rect{width: 3, height: 4}
+
+    // Circle 和 Rect 都实现了 Geometry 接口，所以可以作为 measure 函数的参数
+    measure(c)
+    measure(r)
+}
+----
+
+== Go 并发
+
+并发是 Go 语言的核心特性之一。它通过 Goroutine 和 Channel 来实现。
+
+=== Goroutine
+
+Goroutine 是由 Go 运行时管理的轻量级线程。使用 `go` 关键字即可启动一个新的 Goroutine。
+
+[source, Go]
+----
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func say(s string) {
+    for i := 0; i < 3; i++ {
+        time.Sleep(100 * time.Millisecond)
+        fmt.Println(s)
+    }
+}
+
+func main() {
+    // 启动一个新的 Goroutine
+    go say("world")
+    
+    // 当前 Goroutine (main)
+    say("hello")
+    
+    // 等待一段时间，让 "world" Goroutine 有机会执行完
+    time.Sleep(500 * time.Millisecond) 
+    // 如果没有这句等待，main 函数会立即结束，可能导致 "world" 没机会打印
+}
+----
+
+=== Channel
+
+Channel 是用于在 Goroutine 之间传递数据的管道。它是实现并发同步的重要工具。
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    // 创建一个可以传递 string 类型数据的 channel
+    messages := make(chan string)
+
+    // 启动一个 Goroutine，向 channel 发送数据
+    go func() { 
+        messages <- "ping" // 使用 <- 操作符发送数据
+    }()
+
+    // 从 channel 接收数据
+    // 这个接收操作是阻塞的，直到有数据被发送进来
+    msg := <-messages
+    fmt.Println(msg)
+}
+----
+
+=== Select
+
+`select` 语句可以让一个 Goroutine 同时等待多个通信操作。`select` 会阻塞，直到其中一个 `case` 可以运行，然后它就执行那个 `case`。
+
+[source, Go]
+----
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    c1 := make(chan string)
+    c2 := make(chan string)
+
+    go func() {
+        time.Sleep(1 * time.Second)
+        c1 <- "one"
+    }()
+    go func() {
+        time.Sleep(2 * time.Second)
+        c2 <- "two"
+    }()
+
+    // select 会等待 c1 和 c2 的响应
+    for i := 0; i < 2; i++ {
+        select {
+        case msg1 := <-c1:
+            fmt.Println("received", msg1)
+        case msg2 := <-c2:
+            fmt.Println("received", msg2)
+        }
+    }
+}
+----
