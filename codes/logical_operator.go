@@ -24,3 +24,7 @@ func main() {
 	}
 	fmt.Println("x =", x) // 10（x++未执行）
 }
+
+func autoincrement(){
+
+}
