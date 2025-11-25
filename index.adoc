@@ -459,7 +459,74 @@ func main() {
 
 === 比较运算符
 
+[source, Go]
+----
+package main
 
+import "fmt"
+
+func main() {
+	// 数值比较
+	m, n := 10, 20
+	fmt.Println("m == n?", m == n) // false
+	fmt.Println("m < n?", m < n)   // true
+	fmt.Println("m >= n?", m >= n) // false
+
+	// 字符串比较（按Unicode码点顺序）
+	s1, s2 := "apple", "banana"
+	s3 := "apple"
+	fmt.Println("s1 == s3?", s1 == s3) // true
+	fmt.Println("s1 < s2?", s1 < s2)   // true（'a' 的码点 < 'b'）
+
+	// 布尔值比较
+	b1, b2 := true, false
+	fmt.Println("b1 != b2?", b1 != b2) // true
+
+	// 指针比较（指向同一变量则相等）
+	p1 := &m
+	p2 := &m
+	p3 := &n
+	fmt.Println("p1 == p2?", p1 == p2) // true
+	fmt.Println("p1 == p3?", p1 == p3) // false
+
+	// 错误示例：不同类型不能直接比较
+	// var num int = 10
+	// var f float64 = 10.0
+	// fmt.Println(num == f) // 编译错误：int 和 float64 不兼容
+}
+----
+
+=== 逻辑运算符
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+	// 基础逻辑运算
+	a, b := true, false
+	fmt.Println("a && b =", a && b) // false（且：都为true才true）
+	fmt.Println("a || b =", a || b) // true（或：任一为true则true）
+	fmt.Println("!a =", !a)         // false（非：取反）
+
+	// 短路特性演示
+	x, y := 10, 20
+
+	// 逻辑与短路：左为false，右表达式（y++）不执行
+	if x > 100 && y++ > 0 {
+		fmt.Println("逻辑与执行")
+	}
+	fmt.Println("y =", y) // 20（y++未执行）
+
+	// 逻辑或短路：左为true，右表达式（x++）不执行
+	if x < 20 || x++ > 0 {
+		fmt.Println("逻辑或执行")
+	}
+	fmt.Println("x =", x) // 10（x++未执行）
+}
+----
 
 == Go 流程控制
 
