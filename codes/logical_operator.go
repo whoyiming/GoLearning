@@ -13,18 +13,18 @@ func main() {
 	x, y := 10, 20
 
 	// 逻辑与短路：左为false，右表达式（y++）不执行
-	if x > 100 && y++ > 0 {
+	if x > 100 && autoincrement(y) > 0 {
 		fmt.Println("逻辑与执行")
 	}
 	fmt.Println("y =", y) // 20（y++未执行）
 
 	// 逻辑或短路：左为true，右表达式（x++）不执行
-	if x < 20 || x++ > 0 {
+	if x < 20 || autoincrement(x) > 0 {
 		fmt.Println("逻辑或执行")
 	}
 	fmt.Println("x =", x) // 10（x++未执行）
 }
 
-func autoincrement(){
-
+func autoincrement(val int) int {
+	return val + 1
 }
