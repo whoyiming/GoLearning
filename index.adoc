@@ -537,33 +537,35 @@ func autoincrement(val int) int {
 
 === if-else 条件语句
 
-`if` 语句在基础语法中已经接触过，它还有一个强大的特性：可以在条件判断前包含一个初始化语句。这个初始化语句定义的变量，其作用域仅在 `if-else` 块内。
-
 [source, Go]
 ----
 package main
 
-import (
-    "fmt"
-    "os"
-)
+import "fmt"
 
 func main() {
-    // a 的作用域只在 if-else 内部
-    if a := len(os.Args); a > 1 {
-        fmt.Println("你输入了", a-1, "个参数")
-    } else {
-        fmt.Println("没有检测到输入参数")
-    }
-    
-    // 在这里访问 a 会导致编译错误
-    // fmt.Println(a) 
+	// 示例1：基础if-else
+	score := 85
+	if score >= 90 {
+		fmt.Println("优秀")
+	} else if score >= 70 {
+		fmt.Println("良好")
+	} else {
+		fmt.Println("及格/不及格")
+	}
+
+	// 示例2：if初始化语句（推荐用法）
+	if age := 22; age >= 18 { // age仅在if-else内有效
+		fmt.Println("成年")
+	} else {
+		fmt.Println("未成年")
+	}
 }
 ----
 
 === for 循环
 
-Go 语言中只有 `for` 这一种循环结构，但它能实现多种循环模式。
+Go 没有while、do-while，所有循环都用for实现，语法灵活，覆盖三种常见场景。
 
 [source, Go]
 ----
@@ -586,12 +588,12 @@ func main() {
     }
     fmt.Println("大于100的最小2的幂是:", n)
 
-    // 3. 无限循环 (需要 break 或 return 退出)
+    // 2. 无限循环 (需要 break 或 return 退出)
     // for {
     //     fmt.Println("这是一个无限循环，请手动停止程序")
     // }
     
-    // 4. for range 遍历 (非常常用)
+    // 3. for range 遍历 (非常常用)
     s := "Go语言"
     for index, char := range s {
         // 注意 index 是字节位置，char 是 rune 类型
@@ -627,7 +629,7 @@ func main() {
         fmt.Printf("%s.\n", os)
     }
 
-    // 2. 无表达式的 switch (相当于 if-else if-else)
+    // 2. 无表达式的 switch (相当于 if-else)
     t := time.Now()
     switch {
     case t.Hour() < 12:
@@ -646,6 +648,18 @@ func main() {
     default:
         fmt.Println("是工作日。")
     }
+
+    // 4：fallthrough（穿透）
+	num := 2
+	switch num {
+	case 2:
+		fmt.Println("匹配2")
+		fallthrough // 强制穿透到下一个case
+	case 3:
+		fmt.Println("穿透到3") // 会执行
+	default:
+		fmt.Println("默认")
+	}
 }
 ----
 
