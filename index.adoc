@@ -530,7 +530,73 @@ func main() {
 func autoincrement(val int) int {
 	return val + 1
 }
+----
 
+=== 位运算符
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+	// 定义8位无符号整数（便于观察二进制）
+	var a uint8 = 0b1010 // 10（十进制）
+	var b uint8 = 0b0110 // 6（十进制）
+
+	// 按位与（&）：仅对应位都为1时为1
+	fmt.Printf("a & b = %d（二进制：%08b）\n", a&b, a&b) // 2（00000010）
+
+	// 按位或（|）：对应位任一为1时为1
+	fmt.Printf("a | b = %d（二进制：%08b）\n", a|b, a|b) // 14（00001110）
+
+	// 按位异或（^）：对应位不同时为1
+	fmt.Printf("a ^ b = %d（二进制：%08b）\n", a^b, a^b) // 12（00001100）
+
+	// 按位取反（^单目）：0→1，1→0（uint8 0b1010 → 0b11110101）
+	fmt.Printf("^a = %d（二进制：%08b）\n", ^a, ^a) // 245（11110101）
+
+	// 左移（<<）：左移2位 → 0b101000 = 40
+	fmt.Printf("a << 2 = %d（二进制：%08b）\n", a<<2, a<<2) // 40（00101000）
+
+	// 右移（>>）：右移1位 → 0b0101 = 5
+	fmt.Printf("a >> 1 = %d（二进制：%08b）\n", a>>1, a>>1) // 5（00000101）
+
+	// 有符号右移（补符号位）
+	var c int8 = -10                                  // 二进制：11110110（补码）
+	fmt.Printf("c >> 1 = %d（二进制：%08b）\n", c>>1, c>>1) // -5（11111011）
+}
+----
+
+=== 其他常用运算符
+
+[source, Go]
+----
+package main
+
+import "fmt"
+
+func main() {
+	// 遍历切片
+	slice := []string{"a", "b", "c"}
+	for idx, val := range slice {
+		fmt.Printf("切片索引：%d，值：%s\n", idx, val) // 0:a, 1:b, 2:c
+	}
+
+	// 遍历字符串（返回字节索引和Unicode码点）
+	str := "Go语言"
+	for idx, char := range str {
+		fmt.Printf("字符串索引：%d，字符：%c（Unicode：%d）\n", idx, char, char)
+		// 0:G(71), 1:o(111), 2:语(35821), 5:言(35328)（中文字符占3字节）
+	}
+
+	// 遍历map（返回键和值，无序）
+	m := map[string]int{"a": 1, "b": 2}
+	for key, val := range m {
+		fmt.Printf("map键：%s，值：%d\n", key, val) // a:1, b:2（顺序不固定）
+	}
+}
 ----
 
 == Go 流程控制
