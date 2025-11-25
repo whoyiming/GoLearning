@@ -663,42 +663,6 @@ func main() {
 }
 ----
 
-=== defer, panic, 和 recover
-
-`defer` 用于延迟执行一个函数调用，通常用于清理资源。`panic` 用于触发一个运行时恐慌（致命错误），而 `recover` 用于捕获这个恐慌，让程序恢复执行。
-
-[source, Go]
-----
-package main
-
-import "fmt"
-
-func main() {
-    // defer 会在函数返回前执行，多个 defer 按后进先出(LIFO)顺序执行
-    defer fmt.Println("世界")
-    defer fmt.Println("，")
-    fmt.Print("你好")
-    // 输出将是: 你好，世界
-
-    causePanic()
-    fmt.Println("这行不会被执行，因为 panic 导致程序中断")
-}
-
-func causePanic() {
-    // 使用 defer 和 recover 来捕获 panic
-    defer func() {
-        // recover() 只有在 defer 的函数中调用才有效
-        if r := recover(); r != nil {
-            fmt.Println("\n捕获到了一个 panic:", r)
-        }
-    }()
-
-    fmt.Println("\n准备触发一个 panic")
-    // 模拟一个致命错误
-    panic("这是一个故意的 panic")
-}
-----
-
 == 复合数据类型
 
 === 数组 (Array)
