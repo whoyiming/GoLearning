@@ -1,0 +1,42 @@
+name: Publish AsciiDoc to gh-pages
+
+on:
+  push:
+    branches: [ main ]  # 触发分支（根据需求修改）
+
+jobs:
+  convert-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      # 步骤1: 检出代码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 步骤2: 安装 AsciiDoctor 工具链
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Install AsciiDoctor
+        run: |
+          gem install asciidoctor
+          gem install asciidoctor-pdf
+          gem install asciidoctor-diagram  # 可选：支持图表
+
+      # 步骤3: 生成 HTML/PDF
+      - name: Build Docs
+        run: |
+          mkdir -p public  # 创建输出目录
+          cp -r images public/
+          asciidoctor -D public -r asciidoctor-diagram index.adoc   # 生成HTML
+          # asciidoctor-pdf -D public docs/index.adoc                      # 生成PDF
+
+      # 步骤4: 部署到 gh-pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # 自动使用内置Token
+          publish_dir: ./public     # 输出文件目录
+          destination_dir: ./       # 目标目录（gh-pages根目录）
+          keep_files: false         # 清除旧文件
