@@ -2449,61 +2449,110 @@ func main() {
 <div class="sect2">
 <h3 id="_接口_interface">10.2. 接口 (Interface)</h3>
 <div class="paragraph">
-<p>接口是定义了一组方法签名的类型。一个类型只要实现了接口中定义的所有方法，就被认为是“实现”了这个接口。这种实现是隐式的，无需像Java一样使用`implements`关键字。</p>
+<p>接口是方法集合的抽象定义，只声明方法签名（无实现），不关心具体类型，只关心类型是否实现了这些方法。Go 的接口具有以下核心特性：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>「隐式实现」：无需显式声明implements，只要类型实现了接口的所有方法，就自动属于该接口类型；</p>
+</li>
+<li>
+<p>「非侵入式」：接口定义与实现分离，实现者无需依赖接口定义（降低耦合）；</p>
+</li>
+<li>
+<p>「多态支持」：同一接口可接收不同实现类型，调用时自动执行对应类型的方法。</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-Go hljs" data-lang="Go">package main
 
-import (
-    "fmt"
-    "math"
-)
+import "fmt"
 
-// 定义一个几何体接口
-type Geometry interface {
-    area() float64
-    perim() float64
+// 1. 定义接口：Shape（形状），声明方法签名
+type Shape interface {
+	Area() float64      // 计算面积
+	Perimeter() float64 // 计算周长
 }
 
-// 定义 Circle 和 Rect 类型
+// 2. 实现类1：Circle（圆形），隐式实现Shape接口
 type Circle struct {
-    radius float64
-}
-type Rect struct {
-    width, height float64
+	Radius float64
 }
 
-// 为 Circle 实现 Geometry 接口
-func (c Circle) area() float64 {
-    return math.Pi * c.radius * c.radius
-}
-func (c Circle) perim() float64 {
-    return 2 * math.Pi * c.radius
+// 实现Shape的Area方法
+func (c Circle) Area() float64 {
+	return 3.14 * c.Radius * c.Radius
 }
 
-// 为 Rect 实现 Geometry 接口
-func (r Rect) area() float64 {
-    return r.width * r.height
-}
-func (r Rect) perim() float64 {
-    return 2*r.width + 2*r.height
+// 实现Shape的Perimeter方法（必须实现接口的所有方法）
+func (c Circle) Perimeter() float64 {
+	return 2 * 3.14 * c.Radius
 }
 
-// measure 函数接收任何实现了 Geometry 接口的类型
-func measure(g Geometry) {
-    fmt.Println(g)
-    fmt.Println("面积:", g.area())
-    fmt.Println("周长:", g.perim())
+// 3. 实现类2：Rectangle（矩形），隐式实现Shape接口
+type Rectangle struct {
+	Width  float64
+	Height float64
+}
+
+// 实现Shape的Area方法
+func (r Rectangle) Area() float64 {
+	return r.Width * r.Height
+}
+
+// 实现Shape的Perimeter方法
+func (r Rectangle) Perimeter() float64 {
+	return 2 * (r.Width + r.Height)
+}
+
+// 4. 接口的多态应用：接收Shape接口参数，自动适配不同实现类
+func PrintShapeInfo(s Shape) {
+	fmt.Printf("面积：%.2f，周长：%.2f\n", s.Area(), s.Perimeter())
+}
+
+// 5. 空接口：interface{}（无任何方法），可接收任意类型
+func PrintAnyValue(v interface{}) {
+	fmt.Printf("类型：%T，值：%v\n", v, v)
+}
+
+// 6. 接口断言：判断接口的具体实现类型
+func GetShapeType(s Shape) string {
+	// 格式：value, ok := 接口变量.(具体类型)
+	if _, ok := s.(Circle); ok {
+		return "圆形"
+	}
+	if _, ok := s.(Rectangle); ok {
+		return "矩形"
+	}
+	return "未知形状"
 }
 
 func main() {
-    c := Circle{radius: 5}
-    r := Rect{width: 3, height: 4}
+	// 示例1：多态调用（同一接口接收不同类型）
+	fmt.Println("=== 接口多态 ===")
+	circle := Circle{Radius: 5}
+	rectangle := Rectangle{Width: 4, Height: 3}
 
-    // Circle 和 Rect 都实现了 Geometry 接口，所以可以作为 measure 函数的参数
-    measure(c)
-    measure(r)
+	fmt.Print("圆形：")
+	PrintShapeInfo(circle) // 输出：面积：78.50，周长：31.40
+	fmt.Print("矩形：")
+	PrintShapeInfo(rectangle) // 输出：面积：12.00，周长：14.00
+	fmt.Println()
+
+	// 示例2：接口断言（判断具体类型）
+	fmt.Println("=== 接口断言 ===")
+	fmt.Printf("circle 是 %s\n", GetShapeType(circle))       // 输出：圆形
+	fmt.Printf("rectangle 是 %s\n", GetShapeType(rectangle)) // 输出：矩形
+	fmt.Println()
+
+	// 示例3：空接口（接收任意类型）
+	fmt.Println("=== 空接口 ===")
+	PrintAnyValue(100)        // 输出：类型：int，值：100
+	PrintAnyValue("Hello Go") // 输出：类型：string，值：Hello Go
+	PrintAnyValue(true)       // 输出：类型：bool，值：true
+	PrintAnyValue(circle)     // 输出：类型：main.Circle，值：{5}
 }</code></pre>
 </div>
 </div>
@@ -2624,7 +2673,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-01 08:24:33 UTC
+Last updated 2025-12-01 08:50:53 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
