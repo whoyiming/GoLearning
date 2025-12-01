@@ -500,7 +500,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_指针">9. 指针</a></li>
 <li><a href="#_方法与接口">10. 方法与接口</a>
 <ul class="sectlevel2">
-<li><a href="#_方法_method">10.1. 方法 (Method)</a></li>
+<li><a href="#_方法_method">10.1. 方法 (Method)</a>
+<ul class="sectlevel3">
+<li><a href="#_值接收者_vs_指针接收者">10.1.1. 值接收者 VS 指针接收者</a></li>
+</ul>
+</li>
 <li><a href="#_接口_interface">10.2. 接口 (Interface)</a></li>
 </ul>
 </li>
@@ -2320,31 +2324,125 @@ func main() {
 
 import "fmt"
 
-type Rect struct {
-    width, height int
+// 1. 定义结构体（方法最常用的绑定类型）
+type Rectangle struct {
+    Width  float64
+    Height float64
 }
 
-// area 方法有一个名为 r，类型为 *Rect 的接收者
-func (r *Rect) area() int {
-    return r.width * r.height
+// 2. 结构体 + 值接收者方法（不能修改原结构体的值）
+// 计算面积：值接收者接收的是结构体副本
+func (r Rectangle) Area() float64 {
+    return r.Width * r.Height
 }
 
-// perim 方法有一个名为 r，类型为 Rect 的接收者
-func (r Rect) perim() int {
-    return 2*r.width + 2*r.height
+// 3. 结构体 + 指针接收者方法（可以修改原结构体的值）
+// 缩放矩形：指针接收者接收的是结构体地址，直接操作原数据
+func (r *Rectangle) Scale(factor float64) {
+    r.Width *= factor
+    r.Height *= factor
+}
+
+// 4. 自定义类型（类型别名）+ 方法
+// 给 int 起别名（基础类型不能直接绑定方法，需通过类型别名）
+type MyInt int
+
+// 自定义类型的方法（值接收者）
+func (m MyInt) Add(n MyInt) MyInt {
+    return m + n
+}
+
+// 自定义类型的指针接收者方法
+func (m *MyInt) Double() {
+    *m *= 2
 }
 
 func main() {
-    r := Rect{width: 10, height: 5}
+    // 示例1：结构体方法调用
+    rect := Rectangle{Width: 5, Height: 3}
+    fmt.Println("=== 结构体方法 ===")
+    fmt.Printf("原始矩形：宽=%.1f，高=%.1f\n", rect.Width, rect.Height)
 
-    // 调用方法
-    fmt.Println("面积: ", r.area())
-    fmt.Println("周长: ", r.perim())
+    // 调用值接收者方法（无修改）
+    area := rect.Area()
+    fmt.Printf("矩形面积：%.1f\n", area) // 输出：15.0
 
-    rp := &amp;r
-    fmt.Println("面积 (通过指针): ", rp.area())
-    fmt.Println("周长 (通过指针): ", rp.perim())
+    // 调用指针接收者方法（修改原结构体）
+    rect.Scale(2) // Go语法糖：rect是值类型，调用指针方法时自动转&amp;rect
+    fmt.Printf("缩放2倍后：宽=%.1f，高=%.1f\n", rect.Width, rect.Height) // 输出：10.0, 6.0
+    fmt.Printf("缩放后面积：%.1f\n", rect.Area()) // 输出：60.0
+    fmt.Println()
+
+    // 示例2：自定义类型方法调用
+    fmt.Println("=== 自定义类型方法 ===")
+    var a MyInt = 10
+    var b MyInt = 20
+
+    // 调用值接收者方法（无修改）
+    sum := a.Add(b)
+    fmt.Printf("a + b = %d\n", sum) // 输出：30
+
+    // 调用指针接收者方法（修改原变量）
+    a.Double() // 语法糖：a是值类型，自动转&amp;a
+    fmt.Printf("a 翻倍后：%d\n", a) // 输出：20
+
+    // 直接用指针调用（等价于上面的语法糖）
+    var c MyInt = 5
+    (&amp;c).Double()
+    fmt.Printf("c 翻倍后：%d\n", c) // 输出：10
 }</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_值接收者_vs_指针接收者">10.1.1. 值接收者 VS 指针接收者</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">特性</th>
+<th class="tableblock halign-left valign-top">值接收者（r Rectangle）</th>
+<th class="tableblock halign-left valign-top">指针接收者（r *Rectangle）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">接收的内容</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">类型的副本（拷贝）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">类型的内存地址（直接操作原数据）</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">是否修改原数据</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">不能（修改的是副本）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">能（操作的是原数据）</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">调用方式</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">值类型 / 指针类型均可调用（自动转换）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">值类型 / 指针类型均可调用（自动转换）</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">适用场景</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">仅查询数据（无修改需求）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">需要修改原数据、大对象（避免拷贝提升效率）</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>语法糖说明：Go 会自动处理值类型与指针类型的方法调用转换，比如：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>对值类型rect Rectangle，调用rect.Scale(2)时，Go 自动转为(&amp;rect).Scale(2)；</p>
+</li>
+<li>
+<p>对指针类型r *Rectangle，调用r.Area()时，Go 自动转为(*r).Area()。</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -2526,7 +2624,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-01 07:10:54 UTC
+Last updated 2025-12-01 08:24:33 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
