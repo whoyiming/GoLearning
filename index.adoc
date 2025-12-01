@@ -391,6 +391,74 @@ func main() {
 }
 ```
 
+=== 关键字
+
+|===
+| 功能分类         | 关键字          | 核心说明                                                                 | 典型场景示例  
+
+| 包与导入相关    
+| `package`       
+| 定义当前文件所属包，程序入口必须为 `package main`                        
+| `package main`（可执行程序）、`package utils`（工具包）     
+
+|                 
+| `import`       
+| 导入外部包（系统包/自定义包），支持别名、多行导入                        
+| `import "fmt"`、`import str "strings"`、`import ("math" "time")`             
+
+| 声明与定义相关  
+| `var`           
+| 声明变量（全局/局部），支持类型推导、批量声明                           
+| `var a int = 10`、`var b = 20`、`var (x bool; y float64)`                    
+
+|                  
+| `const`        
+| 声明常量（编译期确定，不可修改），支持 `iota` 枚举                        
+| `const Pi = 3.14`、`const (Sun = iota; Mon)`                                |           
+
+| `type`          
+| 定义自定义类型（别名、结构体、接口等）                                 
+| `type MyInt int`、`type Person struct{Name string}`、`type SayHello interface{}` 
+|
+               
+| `func`          
+| 声明函数或方法（绑定到类型的函数），支持多返回值、可变参数               
+| `func add(a,b int) int`、`func (p Person) Greet() string`                   
+|
+
+| 控制流语句      
+| `if`/`else`     
+| 条件判断，支持在 `if` 中声明变量（作用域仅限块内）                      
+| `if age >=18 { ... } else { ... }`、`if res, err := fn(); err == nil { ... }`
+
+|           
+| `for`/`range`   | `for` 是唯一循环语句，`range` 用于遍历容器（数组/切片/map/通道）         
+| `for i:=0;i<5;i++`、`for k,v := range slice { ... }`                       
+|
+
+|                  
+| `switch`/`case` | 多分支选择，默认自动 break，支持任意类型匹配                              
+| `switch day { case "周一": ... case "周二": ... }`                          
+|
+|                  | `default`       | `switch`/`select` 中所有分支不匹配时执行                                | `switch { ... default: ... }`、`select { ... default: ... }`                |
+|                  | `fallthrough`   | 强制 `switch` 执行下一个 `case`（默认不执行）                            | `case "周一": fmt.Println("上班"); fallthrough`                              |
+|                  | `break`         | 退出当前循环或 `switch`/`select`                                        | `for { if i==3 { break } }`                                                |
+|                  | `continue`      | 跳过当前循环迭代，进入下一次                                            | `for i:=0;i<5;i++ { if i==2 { continue } }`                                 |
+|                  | `return`        | 退出函数，返回指定结果（支持裸返回）                                    | `return a+b`、`func calc() (int,int) { ... return }`                        |
+|                  | `goto`          | 跳转到函数内的标签（不推荐滥用）                                        | `goto endLabel; ... endLabel: fmt.Println("结束")`                           |
+|:::               |                 |                                                                        |                                                                            |
+| 数据结构与接口   | `struct`        | 定义结构体（值类型，包含多个不同类型字段）                              | `type Student struct{Name string; Age int}`                                 |
+|                  | `interface`     | 定义接口（仅声明方法集合，隐式实现），支持多态                            | `type Animal interface{Speak() string}`                                      |
+|                  | `map`           | 定义键值对映射（引用类型，键必须可比较）                                | `m := map[string]int{"a":1, "b":2}`                                          |
+|:::               |                 |                                                                        |                                                                            |
+| 并发编程         | `go`            | 启动 goroutine（轻量级线程），异步执行函数                              | `go printNumbers()`                                                         |
+|                  | `chan`          | 定义通道（goroutine 间通信机制），支持有缓冲/无缓冲                      | `ch := make(chan int)`、`ch := make(chan string, 5)`                         |
+|                  | `select`        | 监听多个通道的发送/接收操作，随机选择就绪分支                            | `select { case msg := <-ch1: ... case msg := <-ch2: ... }`                  |
+|:::               |                 |                                                                        |                                                                            |
+| 其他核心         | `defer`         | 延迟执行函数（函数退出前执行，先进后出），用于资源释放                  | `file := openFile(); defer closeFile(file)`                                  |
+|                  | `nil`           | 空值标识符（适用于指针/通道/map/切片/接口/函数，非关键字）              | `var p *int = nil`、`var m map[string]int = nil`                             |
+|===
+
 == 运算符
 
 === 算术运算符
