@@ -468,6 +468,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_数据类型">4.1. 数据类型</a></li>
 <li><a href="#_变量">4.2. 变量</a></li>
 <li><a href="#_常量">4.3. 常量</a></li>
+<li><a href="#_关键字">4.4. 关键字</a></li>
 </ul>
 </li>
 <li><a href="#_运算符">5. 运算符</a>
@@ -1126,6 +1127,165 @@ func main() {
 }</code></pre>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_关键字">4.4. 关键字</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">功能分类</th>
+<th class="tableblock halign-left valign-top">关键字</th>
+<th class="tableblock halign-left valign-top">核心说明</th>
+<th class="tableblock halign-left valign-top">典型场景示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">包与导入相关</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>package</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">定义当前文件所属包，程序入口必须为 <code>package main</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>package main</code>（可执行程序）、<code>package utils</code>（工具包）</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>import</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">导入外部包（系统包/自定义包），支持别名、多行导入</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>import "fmt"</code>、<code>import str "strings"</code>、<code>import ("math" "time")</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">声明与定义相关</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>var</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">声明变量（全局/局部），支持类型推导、批量声明</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>var a int = 10</code>、<code>var b = 20</code>、<code>var (x bool; y float64)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>const</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">声明常量（编译期确定，不可修改），支持 <code>iota</code> 枚举</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>const Pi = 3.14</code>、<code>const (Sun = iota; Mon)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">定义自定义类型（别名、结构体、接口等）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type MyInt int</code>、<code>type Person struct{Name string}</code>、<code>type SayHello interface{}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>func</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">声明函数或方法（绑定到类型的函数），支持多返回值、可变参数</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>func add(a,b int) int</code>、<code>func (p Person) Greet() string</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">控制流语句</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>if</code>/<code>else</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">条件判断，支持在 <code>if</code> 中声明变量（作用域仅限块内）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>if age &gt;=18 { &#8230;&#8203; } else { &#8230;&#8203; }</code>、<code>if res, err := fn(); err == nil { &#8230;&#8203; }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>for</code>/<code>range</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>for</code> 是唯一循环语句，<code>range</code> 用于遍历容器（数组/切片/map/通道）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>for i:=0;i&lt;5;i++</code>、<code>for k,v := range slice { &#8230;&#8203; }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>switch</code>/<code>case</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">多分支选择，默认自动 break，支持任意类型匹配</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>switch day { case "周一": &#8230;&#8203; case "周二": &#8230;&#8203; }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>default</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>switch</code>/<code>select</code> 中所有分支不匹配时执行</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>switch { &#8230;&#8203; default: &#8230;&#8203; }</code>、<code>select { &#8230;&#8203; default: &#8230;&#8203; }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fallthrough</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">强制 <code>switch</code> 执行下一个 <code>case</code>（默认不执行）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>case "周一": fmt.Println("上班"); fallthrough</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>break</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">退出当前循环或 <code>switch</code>/<code>select</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>for { if i==3 { break } }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>continue</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">跳过当前循环迭代，进入下一次</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>for i:=0;i&lt;5;i++ { if i==2 { continue } }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>return</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">退出函数，返回指定结果（支持裸返回）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>return a+b</code>、<code>func calc() (int,int) { &#8230;&#8203; return }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>goto</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">跳转到函数内的标签（不推荐滥用）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>goto endLabel; &#8230;&#8203; endLabel: fmt.Println("结束")</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">数据结构与接口</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>struct</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">定义结构体（值类型，包含多个不同类型字段）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type Student struct{Name string; Age int}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>interface</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">定义接口（仅声明方法集合，隐式实现），支持多态</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type Animal interface{Speak() string}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>map</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">定义键值对映射（引用类型，键必须可比较）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>m := map[string]int{"a":1, "b":2}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">并发编程</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>go</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">启动 goroutine（轻量级线程），异步执行函数</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>go printNumbers()</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>chan</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">定义通道（goroutine 间通信机制），支持有缓冲/无缓冲</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ch := make(chan int)</code>、<code>ch := make(chan string, 5)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>select</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">监听多个通道的发送/接收操作，随机选择就绪分支</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>select { case msg := &#8592;ch1: &#8230;&#8203; case msg := &#8592;ch2: &#8230;&#8203; }</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">其他核心</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>defer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">延迟执行函数（函数退出前执行，先进后出），用于资源释放</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file := openFile(); defer closeFile(file)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nil</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">空值标识符（适用于指针/通道/map/切片/接口/函数，非关键字）</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>var p *int = nil</code>、<code>var m map[string]int = nil</code></p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -2366,7 +2526,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-01 03:24:00 UTC
+Last updated 2025-12-01 07:10:54 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
