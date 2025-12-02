@@ -508,11 +508,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_接口_interface">10.2. 接口 (Interface)</a></li>
 </ul>
 </li>
-<li><a href="#_go_并发">11. Go 并发</a>
+<li><a href="#_go_泛型">11. Go 泛型</a></li>
+<li><a href="#_go_并发">12. Go 并发</a>
 <ul class="sectlevel2">
-<li><a href="#_goroutine">11.1. Goroutine</a></li>
-<li><a href="#_channel">11.2. Channel</a></li>
-<li><a href="#_select">11.3. Select</a></li>
+<li><a href="#_goroutine">12.1. Goroutine</a></li>
+<li><a href="#_channel">12.2. Channel</a></li>
+<li><a href="#_select">12.3. Select</a></li>
 </ul>
 </li>
 </ul>
@@ -2560,13 +2561,59 @@ func main() {
 </div>
 </div>
 <div class="sect1">
-<h2 id="_go_并发">11. Go 并发</h2>
+<h2 id="_go_泛型">11. Go 泛型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Go语言从1.18版本开始正式支持泛型，通过类型参数和类型约束，让开发者能够编写更加灵活和可重用的代码。</p>
+</div>
+<div class="paragraph">
+<p>泛型主要通过以下两个核心概念来实现：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>类型参数（Type Parameters）：允许你在函数或类型定义中使用一个或多个类型作为参数。</p>
+</li>
+<li>
+<p>类型约束（Type Constraints）：指定类型参数必须满足的条件，确保在函数内部可以安全地操作这些类型。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Go 提供两个常用内置约束，无需自定义：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>any：等价于 interface{}，支持所有类型（最宽松约束）；</p>
+</li>
+<li>
+<p>comparable：支持可比较类型（即能使用 ==/!= 比较的类型，如 int/string/struct 等，排除 slice/map/chan）。</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>通用求和函数（支持 int/float64）</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_go_并发">12. Go 并发</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>并发是 Go 语言的核心特性之一。它通过 Goroutine 和 Channel 来实现。</p>
 </div>
 <div class="sect2">
-<h3 id="_goroutine">11.1. Goroutine</h3>
+<h3 id="_goroutine">12.1. Goroutine</h3>
 <div class="paragraph">
 <p>Goroutine 是由 Go 运行时管理的轻量级线程。使用 <code>go</code> 关键字即可启动一个新的 Goroutine。</p>
 </div>
@@ -2601,7 +2648,7 @@ func main() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_channel">11.2. Channel</h3>
+<h3 id="_channel">12.2. Channel</h3>
 <div class="paragraph">
 <p>Channel 是用于在 Goroutine 之间传递数据的管道。它是实现并发同步的重要工具。</p>
 </div>
@@ -2629,7 +2676,7 @@ func main() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_select">11.3. Select</h3>
+<h3 id="_select">12.3. Select</h3>
 <div class="paragraph">
 <p><code>select</code> 语句可以让一个 Goroutine 同时等待多个通信操作。<code>select</code> 会阻塞，直到其中一个 <code>case</code> 可以运行，然后它就执行那个 <code>case</code>。</p>
 </div>
@@ -2673,7 +2720,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-01 08:50:53 UTC
+Last updated 2025-12-02 01:44:32 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
