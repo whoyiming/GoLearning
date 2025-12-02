@@ -469,6 +469,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_变量">4.2. 变量</a></li>
 <li><a href="#_常量">4.3. 常量</a></li>
 <li><a href="#_关键字">4.4. 关键字</a></li>
+<li><a href="#_注释">4.5. 注释</a></li>
 </ul>
 </li>
 <li><a href="#_运算符">5. 运算符</a>
@@ -1300,6 +1301,31 @@ func main() {
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect2">
+<h3 id="_注释">4.5. 注释</h3>
+<div class="paragraph">
+<p>Go 仅支持 单行注释 和 块注释 两种，语法简洁且无歧义，不支持嵌套注释。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>// 注释内容（从 // 开始到行尾，均为注释）</p>
+</li>
+<li>
+<p>块注释（/* */）</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>// 注释单行内容
+/*
+注释内容
+可以换行
+*/</pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -2998,7 +3024,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-02 03:13:26 UTC
+Last updated 2025-12-02 03:50:11 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
