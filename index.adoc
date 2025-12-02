@@ -1885,6 +1885,152 @@ func main() {
 }
 ----
 
+== Go 错误处理
+Go 语言的错误处理核心基于 error 接口，遵循「显式返回、提前检查」的设计哲学，不使用 try/catch 机制。
+
+=== 基础错误处理（函数返回 + 检查错误）
+最常用场景：函数返回 (结果, error)，调用方显式检查错误，提前返回避免嵌套。
+
+[source, Go]
+----
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 模拟除法运算，返回结果或错误
+func divide(a, b int) (int, error) {
+	if b == 0 {
+		// 用 errors.New 创建基础错误
+		return 0, errors.New("除数不能为 0")
+	}
+	return a / b, nil // 无错误时返回 nil
+}
+
+func main() {
+	// 调用函数并检查错误
+	result, err := divide(10, 2)
+	if err != nil { // 错误不为 nil 表示执行失败
+		fmt.Printf("除法失败：%v\n", err)
+		return
+	}
+	fmt.Printf("10 / 2 = %d\n", result)
+
+	// 测试错误场景
+	result2, err2 := divide(10, 0)
+	if err2 != nil {
+		fmt.Printf("除法失败：%v\n", err2)
+		return
+	}
+	fmt.Printf("10 / 0 = %d\n", result2) // 不会执行
+}
+----
+
+=== 带上下文的错误（fmt.Errorf + %w 包装）
+使用 fmt.Errorf 可添加错误上下文，%w 可包装原始错误（Go 1.13+），后续可通过 errors.Unwrap 解包。
+
+[source, Go]
+----
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 模拟查询用户
+func getUserID(username string) (int, error) {
+	if username == "" {
+		return 0, errors.New("用户名不能为空")
+	}
+	if username != "admin" {
+		return 0, errors.New("用户不存在")
+	}
+	return 1001, nil
+}
+
+// 模拟查询用户信息（包装下层错误）
+func getUserInfo(username string) (string, error) {
+	userID, err := getUserID(username)
+	if err != nil {
+		// 用 %w 包装原始错误，添加上下文
+		return "", fmt.Errorf("查询用户ID失败：%w", err)
+	}
+	return fmt.Sprintf("用户ID：%d，用户名：%s", userID, username), nil
+}
+
+func main() {
+	info, err := getUserInfo("guest")
+	if err != nil {
+		fmt.Printf("获取用户信息失败：%v\n", err)
+
+		// 解包原始错误并判断
+		originalErr := errors.Unwrap(err)
+		fmt.Printf("原始错误：%v\n", originalErr)
+		return
+	}
+	fmt.Printf("用户信息：%s\n", info)
+}
+----
+
+=== 错误判断（errors.Is + errors.As）
+
+* errors.Is：判断错误链中是否包含目标错误（解决包装错误无法用 == 判断的问题）。
+* errors.As：将错误链中的特定类型错误转换为目标类型（处理自定义错误类型）。
+
+[source, Go]
+----
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 定义自定义错误类型（实现 error 接口）
+type NotFoundError struct {
+	Resource string // 资源名称（如用户、文件）
+}
+
+// 实现 Error() 方法，满足 error 接口
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("%s 不存在", e.Resource)
+}
+
+// 模拟查询资源
+func findResource(name string) error {
+	if name == "" {
+		return errors.New("资源名称不能为空")
+	}
+	// 返回自定义错误类型
+	return fmt.Errorf("查询失败：%w", &NotFoundError{Resource: name})
+}
+
+func main() {
+	// 场景1：用 errors.Is 判断基础错误
+	err1 := findResource("")
+	if errors.Is(err1, errors.New("资源名称不能为空")) {
+		fmt.Printf("错误匹配：%v\n", err1)
+	}
+
+	// 场景2：用 errors.As 转换自定义错误类型
+	err2 := findResource("订单10086")
+	var notFoundErr *NotFoundError
+	if errors.As(err2, &notFoundErr) { // 检查错误链中是否有 NotFoundError 类型
+		fmt.Printf("自定义错误：资源类型=%s，错误信息=%v\n", notFoundErr.Resource, err2)
+	}
+
+	// 场景3：嵌套包装的错误判断
+	err3 := fmt.Errorf("处理订单失败：%w", err2)
+	if errors.As(err3, &notFoundErr) {
+		fmt.Printf("嵌套错误匹配：%v\n", err3)
+	}
+}
+
+----
+
 == Go 并发
 
 并发是 Go 语言的核心特性之一。它通过 Goroutine 和 Channel 来实现。
