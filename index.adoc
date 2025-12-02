@@ -1600,11 +1600,46 @@ Go 提供两个常用内置约束，无需自定义：
 * any：等价于 interface{}，支持所有类型（最宽松约束）；
 * comparable：支持可比较类型（即能使用 ==/!= 比较的类型，如 int/string/struct 等，排除 slice/map/chan）。
 
-1. 通用求和函数（支持 int/float64）
+
+通用求和函数（支持 int/float64）
 [source, Go]
 ----
+package main
+
+import "fmt"
+
+// 泛型求和函数
+// T：类型参数，约束为 int | float64（仅允许这两种数值类型）
+// nums：参数为 T 类型的切片
+// 返回值：T 类型（与输入类型一致）
+func Sum[T int | float64](nums []T) T {
+	var total T // 声明 T 类型的零值（int=0，float64=0.0）
+	for _, num := range nums {
+		total += num // 仅数值类型支持 +=，约束保证了类型合法性
+	}
+	return total
+}
+
+func main() {
+	// 1. 传入 int 类型切片（自动推导类型参数 T=int）
+	intNums := []int{1, 2, 3, 4, 5}
+	intSum := Sum(intNums)
+	fmt.Printf("int 求和：%d\n", intSum) // 输出：15
+
+	// 2. 传入 float64 类型切片（自动推导类型参数 T=float64）
+	floatNums := []float64{1.1, 2.2, 3.3}
+	floatSum := Sum(floatNums)
+	fmt.Printf("float64 求和：%.2f\n", floatSum) // 输出：6.60
+
+	// 3. 显式指定类型参数（推荐在类型不明确时使用）
+	explicitSum := Sum[float64]([]float64{4.4, 5.5})
+	fmt.Printf("显式指定类型求和：%.2f\n", explicitSum) // 输出：9.90
+}
 
 ----
+
+*  通用比较函数（支持 comparable 类型）
+
 
 == Go 并发
 
