@@ -1600,8 +1600,7 @@ Go 提供两个常用内置约束，无需自定义：
 * any：等价于 interface{}，支持所有类型（最宽松约束）；
 * comparable：支持可比较类型（即能使用 ==/!= 比较的类型，如 int/string/struct 等，排除 slice/map/chan）。
 
-
-通用求和函数（支持 int/float64）
+==== 通用求和函数（支持 int/float64）
 [source, Go]
 ----
 package main
@@ -1638,7 +1637,7 @@ func main() {
 
 ----
 
-*  通用比较函数（支持 comparable 类型）
+==== 通用比较函数（支持 comparable 类型）
 
 
 == Go 并发
