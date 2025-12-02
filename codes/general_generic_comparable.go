@@ -5,7 +5,7 @@ import "fmt"
 // 泛型比较函数：返回两个值中较大的一个
 // T：约束为 comparable（可比较类型）+ 支持 > 运算符（int/string/float64 等）
 func Max[T comparable](a, b T) T {
-	// 注意：comparable 仅保证支持 ==/!=，> 运算符需类型本身支持（如数值/字符串）
+	// 注意：comparable 仅保证支持 ==/!=，对于 > 运算符需类型本身支持（如数值/字符串）
 	// 若传入不支持 > 的类型（如 struct），编译报错（类型安全）
 	if a > b {
 		return a
