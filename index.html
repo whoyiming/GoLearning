@@ -3047,10 +3047,12 @@ func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("%s 不存在", e.Resource)
 }
 
+var errEmptyResource = errors.New("资源名称不能为空")
+
 // 模拟查询资源
 func findResource(name string) error {
 	if name == "" {
-		return errors.New("资源名称不能为空")
+		return errEmptyResource
 	}
 	// 返回自定义错误类型
 	return fmt.Errorf("查询失败：%w", &amp;NotFoundError{Resource: name})
@@ -3059,7 +3061,7 @@ func findResource(name string) error {
 func main() {
 	// 场景1：用 errors.Is 判断基础错误
 	err1 := findResource("")
-	if errors.Is(err1, errors.New("资源名称不能为空")) {
+	if errors.Is(err1, errEmptyResource) {
 		fmt.Printf("错误匹配：%v\n", err1)
 	}
 
@@ -3195,7 +3197,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-02 08:46:30 UTC
+Last updated 2025-12-02 09:33:42 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
