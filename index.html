@@ -519,11 +519,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_泛型迭代器接口">11.6. 泛型迭代器接口</a></li>
 </ul>
 </li>
-<li><a href="#_go_并发">12. Go 并发</a>
+<li><a href="#_go_错误处理">12. Go 错误处理</a>
 <ul class="sectlevel2">
-<li><a href="#_goroutine">12.1. Goroutine</a></li>
-<li><a href="#_channel">12.2. Channel</a></li>
-<li><a href="#_select">12.3. Select</a></li>
+<li><a href="#_基础错误处理函数返回_检查错误">12.1. 基础错误处理（函数返回 + 检查错误）</a></li>
+<li><a href="#_带上下文的错误fmt_errorf_w_包装">12.2. 带上下文的错误（fmt.Errorf + %w 包装）</a></li>
+<li><a href="#_错误判断errors_is_errors_as">12.3. 错误判断（errors.Is + errors.As）</a></li>
+</ul>
+</li>
+<li><a href="#_go_并发">13. Go 并发</a>
+<ul class="sectlevel2">
+<li><a href="#_goroutine">13.1. Goroutine</a></li>
+<li><a href="#_channel">13.2. Channel</a></li>
+<li><a href="#_select">13.3. Select</a></li>
 </ul>
 </li>
 </ul>
@@ -2911,13 +2918,177 @@ func main() {
 </div>
 </div>
 <div class="sect1">
-<h2 id="_go_并发">12. Go 并发</h2>
+<h2 id="_go_错误处理">12. Go 错误处理</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Go 语言的错误处理核心基于 error 接口，遵循「显式返回、提前检查」的设计哲学，不使用 try/catch 机制。</p>
+</div>
+<div class="sect2">
+<h3 id="_基础错误处理函数返回_检查错误">12.1. 基础错误处理（函数返回 + 检查错误）</h3>
+<div class="paragraph">
+<p>最常用场景：函数返回 (结果, error)，调用方显式检查错误，提前返回避免嵌套。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-Go hljs" data-lang="Go">package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 模拟除法运算，返回结果或错误
+func divide(a, b int) (int, error) {
+	if b == 0 {
+		// 用 errors.New 创建基础错误
+		return 0, errors.New("除数不能为 0")
+	}
+	return a / b, nil // 无错误时返回 nil
+}
+
+func main() {
+	// 调用函数并检查错误
+	result, err := divide(10, 2)
+	if err != nil { // 错误不为 nil 表示执行失败
+		fmt.Printf("除法失败：%v\n", err)
+		return
+	}
+	fmt.Printf("10 / 2 = %d\n", result)
+
+	// 测试错误场景
+	result2, err2 := divide(10, 0)
+	if err2 != nil {
+		fmt.Printf("除法失败：%v\n", err2)
+		return
+	}
+	fmt.Printf("10 / 0 = %d\n", result2) // 不会执行
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_带上下文的错误fmt_errorf_w_包装">12.2. 带上下文的错误（fmt.Errorf + %w 包装）</h3>
+<div class="paragraph">
+<p>使用 fmt.Errorf 可添加错误上下文，%w 可包装原始错误（Go 1.13+），后续可通过 errors.Unwrap 解包。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-Go hljs" data-lang="Go">package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 模拟查询用户
+func getUserID(username string) (int, error) {
+	if username == "" {
+		return 0, errors.New("用户名不能为空")
+	}
+	if username != "admin" {
+		return 0, errors.New("用户不存在")
+	}
+	return 1001, nil
+}
+
+// 模拟查询用户信息（包装下层错误）
+func getUserInfo(username string) (string, error) {
+	userID, err := getUserID(username)
+	if err != nil {
+		// 用 %w 包装原始错误，添加上下文
+		return "", fmt.Errorf("查询用户ID失败：%w", err)
+	}
+	return fmt.Sprintf("用户ID：%d，用户名：%s", userID, username), nil
+}
+
+func main() {
+	info, err := getUserInfo("guest")
+	if err != nil {
+		fmt.Printf("获取用户信息失败：%v\n", err)
+
+		// 解包原始错误并判断
+		originalErr := errors.Unwrap(err)
+		fmt.Printf("原始错误：%v\n", originalErr)
+		return
+	}
+	fmt.Printf("用户信息：%s\n", info)
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_错误判断errors_is_errors_as">12.3. 错误判断（errors.Is + errors.As）</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>errors.Is：判断错误链中是否包含目标错误（解决包装错误无法用 == 判断的问题）。</p>
+</li>
+<li>
+<p>errors.As：将错误链中的特定类型错误转换为目标类型（处理自定义错误类型）。</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-Go hljs" data-lang="Go">package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 定义自定义错误类型（实现 error 接口）
+type NotFoundError struct {
+	Resource string // 资源名称（如用户、文件）
+}
+
+// 实现 Error() 方法，满足 error 接口
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("%s 不存在", e.Resource)
+}
+
+// 模拟查询资源
+func findResource(name string) error {
+	if name == "" {
+		return errors.New("资源名称不能为空")
+	}
+	// 返回自定义错误类型
+	return fmt.Errorf("查询失败：%w", &amp;NotFoundError{Resource: name})
+}
+
+func main() {
+	// 场景1：用 errors.Is 判断基础错误
+	err1 := findResource("")
+	if errors.Is(err1, errors.New("资源名称不能为空")) {
+		fmt.Printf("错误匹配：%v\n", err1)
+	}
+
+	// 场景2：用 errors.As 转换自定义错误类型
+	err2 := findResource("订单10086")
+	var notFoundErr *NotFoundError
+	if errors.As(err2, &amp;notFoundErr) { // 检查错误链中是否有 NotFoundError 类型
+		fmt.Printf("自定义错误：资源类型=%s，错误信息=%v\n", notFoundErr.Resource, err2)
+	}
+
+	// 场景3：嵌套包装的错误判断
+	err3 := fmt.Errorf("处理订单失败：%w", err2)
+	if errors.As(err3, &amp;notFoundErr) {
+		fmt.Printf("嵌套错误匹配：%v\n", err3)
+	}
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_go_并发">13. Go 并发</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>并发是 Go 语言的核心特性之一。它通过 Goroutine 和 Channel 来实现。</p>
 </div>
 <div class="sect2">
-<h3 id="_goroutine">12.1. Goroutine</h3>
+<h3 id="_goroutine">13.1. Goroutine</h3>
 <div class="paragraph">
 <p>Goroutine 是由 Go 运行时管理的轻量级线程。使用 <code>go</code> 关键字即可启动一个新的 Goroutine。</p>
 </div>
@@ -2952,7 +3123,7 @@ func main() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_channel">12.2. Channel</h3>
+<h3 id="_channel">13.2. Channel</h3>
 <div class="paragraph">
 <p>Channel 是用于在 Goroutine 之间传递数据的管道。它是实现并发同步的重要工具。</p>
 </div>
@@ -2980,7 +3151,7 @@ func main() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_select">12.3. Select</h3>
+<h3 id="_select">13.3. Select</h3>
 <div class="paragraph">
 <p><code>select</code> 语句可以让一个 Goroutine 同时等待多个通信操作。<code>select</code> 会阻塞，直到其中一个 <code>case</code> 可以运行，然后它就执行那个 <code>case</code>。</p>
 </div>
@@ -3024,7 +3195,7 @@ func main() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-12-02 08:11:12 UTC
+Last updated 2025-12-02 08:46:30 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
