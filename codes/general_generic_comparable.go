@@ -1,12 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"constraints"
+	"fmt"
+)
 
 // 泛型比较函数：返回两个值中较大的一个
-// T：约束为 comparable（可比较类型）+ 支持 > 运算符（int/string/float64 等）
-func Max[T comparable](a, b T) T {
-	// 注意：comparable 仅保证支持 ==/!=，对于 > 运算符需类型本身支持（如数值/字符串）
-	// 若传入不支持 > 的类型（如 struct），编译报错（类型安全）
+// T：约束为 constraints.Ordered（支持 > 运算符的有序类型，如 int/float64/string 等）
+func Max[T constraints.Ordered](a, b T) T {
 	if a > b {
 		return a
 	}
@@ -18,7 +19,7 @@ func main() {
 	fmt.Println("Max(3.14, 2.99) =", Max(3.14, 2.99))                   // 输出：3.14（T=float64）
 	fmt.Println("Max(\"apple\", \"banana\") =", Max("apple", "banana")) // 输出：banana（T=string）
 
-	// 编译错误：struct 虽为 comparable，但不支持 > 运算符
+	// 编译错误（保留原注释，验证类型安全）：struct 不属于 constraints.Ordered，无法传入
 	// type Person struct{ Name string }
 	// p1 := Person{Name: "张三"}
 	// p2 := Person{Name: "李四"}
